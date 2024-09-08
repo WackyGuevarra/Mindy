@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./scss/index.css">
+  <style>
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 90%; /* Ensure it fits nicely on mobile devices */
+    max-width: 400px; /* Max width for larger phones */
+    height: 40vw; /* Fix the height for uniformity */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out the elements */
+    box-sizing: border-box;
+    overflow: auto; /* Add scrolling if content overflows */
+}
+
+.hidden {
+    display: none;
+}
+
+h1 {
+    color: #333;
+    font-size: 1.5em;
+}
+
+.pet-selection {
+    margin: 20px 0;
+}
+
+.pet-button {
+    font-size: 50px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.pet-button:hover {
+    transform: scale(1.1);
+}
+
+.pet-info {
+    margin: 20px 0;
+}
+
+#petName {
+    padding: 5px;
+    font-size: 16px;
+    width: 80%;
+}
+
+#submitBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#result {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #555;
+}
+
+#page2 {
+    margin-top: 20px;
+}
+
+#colorPicker {
+    padding: 5px;
+    margin: 10px;
+}
+
+.pet-controls, .pet-options, .settings {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+button {
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px 0; /* Add spacing around buttons */
+}
+
+#petIcon {
+    font-size: 100px;
+    margin-bottom: 20px;
+}
+
+.chat-container {
+    margin: 20px 0;
+}
+
+.chat-box {
+    height: 200px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.chat-box div {
+    margin-bottom: 10px;
+}
+
+.chat-box .user-message {
+    color: #000;
+}
+
+.chat-box .dog-message {
+    color: #007bff;
+}
+
+#userMessage {
+    width: calc(100% - 90px); /* Adjust width to fit with button */
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#sendMessage {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+  </style>
+  
+</head>
+<body>
+  <div id="page1" class="container">
+    <h1>Choose Your Pet</h1>
+
+    <div class="pet-selection">
+        <button id="dogButton" class="pet-button">🐶</button>
+        <button id="catButton" class="pet-button">🐱</button>
+    </div>
+
+    <div class="pet-info">
+        <label for="petName">Name your pet:</label>
+        <input type="text" id="petName" placeholder="Enter pet name">
+        <button id="submitBtn">Submit</button>
+    </div>
+
+    <div id="result"></div>
+    <!-- Add this inside the #page1 div, below the pet-info div -->
+
+  <h2>Selected Pet:</h2>
+  <div id="selectedPetIcon" class="pet-button"></div>
+
+
+</div>
+
+<!-- Page 2 (Dynamically loaded) -->
+<div id="page2" class="container hidden">
+    <h1 id="petHeader"></h1>
+    <div id="petDisplay">
+        <span id="petIcon" style="font-size: 100px;"></span>
+    </div>
+
+    <div class="pet-controls">
+        <h2>Change Pet Color</h2>
+        <input type="color" id="colorPicker">
+    </div>
+
+    <div class="pet-options">
+        <h2>Achievements</h2>
+        <ul>
+            <li>Drinking water</li>
+            <li>Walking the dog</li>
+        </ul>
+    </div>
+
+    <div class="settings">
+        <h2>Settings</h2>
+        <button id="connectSmartwatch">Connect Smartwatch</button>
+    </div>
+
+    <!-- Add this inside the #page2 div -->
+<div class="chat-container">
+  <h2>Message Your Pet</h2>
+  <div id="chatBox" class="chat-box">
+      <!-- Messages will be appended here -->
+  </div>
+  <input type="text" id="userMessage" placeholder="Type a message...">
+  <button id="sendMessage">Send</button>
+</div>
+
+</div>
+      <script>document.addEventListener('DOMContentLoaded', function () {
+    let selectedPet = '';
+    let petName = '';
+    const resultDiv = document.getElementById('result');
+    const selectedPetIcon = document.getElementById('selectedPetIcon');
+
+    // Page 1 elements
+    const page1 = document.getElementById('page1');
+    const dogButton = document.getElementById('dogButton');
+    const catButton = document.getElementById('catButton');
+    const submitBtn = document.getElementById('submitBtn');
+    const petNameInput = document.getElementById('petName');
+
+    // Page 2 elements
+    const page2 = document.getElementById('page2');
+    const petHeader = document.getElementById('petHeader');
+    const petIcon = document.getElementById('petIcon');
+    const colorPicker = document.getElementById('colorPicker');
+    const chatBox = document.getElementById('chatBox');
+    const userMessageInput = document.getElementById('userMessage');
+    const sendMessageButton = document.getElementById('sendMessage');
+
+    // Event listeners for selecting pet
+    dogButton.addEventListener('click', function () {
+        selectedPet = '🐶 Dog';
+        updateSelectedPet();
+    });
+
+    catButton.addEventListener('click', function () {
+        selectedPet = '🐱 Cat';
+        updateSelectedPet();
+    });
+
+    // Submit button event listener
+    submitBtn.addEventListener('click', function () {
+        petName = petNameInput.value;
+        if (selectedPet && petName) {
+            // Hide Page 1 and show Page 2
+            page1.classList.add('hidden');
+            page2.classList.remove('hidden');
+
+            // Update Page 2
+            petHeader.textContent = `${petName} the ${selectedPet}`;
+            petIcon.textContent = selectedPet === '🐶 Dog' ? '🐶' : '🐱';
+        } else {
+            resultDiv.textContent = 'Please choose a pet and name it!';
+        }
+    });
+
+    // Color picker event listener to change pet icon color
+    colorPicker.addEventListener('input', function () {
+        petIcon.style.color = colorPicker.value;
+    });
+
+    // Connect smartwatch button (functionality to be expanded)
+    document.getElementById('connectSmartwatch').addEventListener('click', function () {
+        alert('Connecting to your smartwatch...');
+    });
+
+    // Chat functionality
+    sendMessageButton.addEventListener('click', function () {
+        const userMessage = userMessageInput.value.trim();
+        if (userMessage) {
+            // Display user message
+            appendMessage(userMessage, 'user-message');
+
+            // Get and display dog response
+            const dogResponse = getDogResponse(userMessage);
+            appendMessage(dogResponse, 'dog-message');
+
+            // Clear the input field
+            userMessageInput.value = '';
+        }
+    });
+
+    function appendMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type;
+        messageDiv.textContent = message;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+    }
+
+    function getDogResponse(message) {
+        // Basic rule-based responses with key phrases
+        const responses = [
+            { pattern: /headache|sick/, response: "I feel like we should go get water." },
+            { pattern: /irritable/, response: "Let’s go get a snack? " },
+            { pattern: /burnt|burnt out|burned out/, response: "Let's nap together!" },
+            { pattern: /restless/, response: "Wanna go on a walk? I love walks!" },
+        ];
+
+        // Normalize the message by trimming spaces and converting to lowercase
+        const normalizedMessage = message.replace(/\s+/g, ' ').trim().toLowerCase();
+
+        // Find a matching response
+        for (const { pattern, response } of responses) {
+            if (pattern.test(normalizedMessage)) {
+                return response;
+            }
+        }
+
+        // Default response if no patterns match
+        return "I don't understand that. Can you try something else?";
+    }
+
+    function updateSelectedPet() {
+        // Update the displayed selected pet icon
+        selectedPetIcon.textContent = selectedPet;
+        resultDiv.textContent = `You selected a ${selectedPet}. Now name it!`;
+    }
+});
+
+    </script>
+
+   
+              
+</body>
+</html>
